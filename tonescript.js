@@ -179,7 +179,7 @@ function toneGenerator(script, unitAmplitude) {
           }, [0])
         ,
         sectDuration = sectStarts[sectStarts.length - 1],
-        modDuration = cadTime % sectDuration;
+        modTime = cadTime % sectDuration;
 
     // Figure out which section we're in and
     // how far into it we are.
@@ -187,15 +187,14 @@ function toneGenerator(script, unitAmplitude) {
         thisSect;
 
     sectStarts.some(function (s, i) {
-      if (modDuration == 0) {
-        // Some bizarre edge case.
-        // Luckily, this simplifies things quite a bit.
+      if (modTime == 0) {
+        // Edge case.
         sectTime = s;
         thisSect = thisCad.sections[0];
         return true;
       }
-      else if (modDuration <= s) {
-        sectTime = s - (cadTime % sectDuration);
+      if (modTime <= s) {
+        sectTime = s - modTime;
         thisSect = thisCad.sections[i - 1];
         return true;
       }
