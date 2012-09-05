@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+var toneScript = require('./tonescript');
+
+toneScript('420@-19,520@-19;10(*/0/1+2)').play();

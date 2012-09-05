@@ -1,0 +1,46 @@
+{
+  "name": "tonescript",
+  "version": "0.0.0",
+  "description": "tonescript parser, can play tonescript tones with baudio",
+  "main": "tonescript.js",
+  "dependencies": {
+    "baudio": "~0.1.3"
+  },
+  "devDependencies": {
+    "tests-of-the-sierra-madre": "*"
+  },
+  "scripts": {
+    "test": "tests-of-the-sierra-madre"
+  },
+  "bin": {
+    "busy": "busy",
+    "call-forwarding": "call-forwarding",
+    "comfort": "comfort",
+    "dial": "dial",
+    "dial2": "dial2",
+    "dialo": "dialo",
+    "holding": "holding",
+    "howler": "howler",
+    "mwi": "mwi",
+    "prompt": "prompt",
+    "sit1": "sit1",
+    "sit2": "sit2",
+    "sit3": "sit3",
+    "sit4": "sit4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jesusabdullah/tonescript.git"
+  },
+  "keywords": [
+    "POTS",
+    "telephony",
+    "tonescript",
+    "ToneScript",
+    "Cisco",
+    "telephone",
+    "ringtone"
+  ],
+  "author": "Joshua Holbrook",
+  "license": "MIT/X11"
+}
