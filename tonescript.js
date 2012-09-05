@@ -31,7 +31,9 @@ function cadScript(script) {
         segments = matchParens.pop();
 
     if (matchParens.length) {
-      throw new Error('cadence script should be of the form `%f(%f/%f[,%f/%f])`');
+      throw new Error(
+        'cadence script should be of the form `%f(%f/%f[,%f/%f])`'
+      );
     }
 
     ringLength = (ringLength === '*') ? Infinity : parseFloat(ringLength);
@@ -87,7 +89,9 @@ function cadScript(script) {
           };
         }
         catch (err) {
-          throw new Error('cadence segments should be of the form `%f/%f[%d[+%d]]`');
+          throw new Error(
+            'cadence segments should be of the form `%f/%f[%d[+%d]]`'
+          );
         }
       })
     ;
@@ -118,7 +122,9 @@ function freqScript(script) {
       };
     }
     catch (err) {
-      throw new Error('freqScript pairs are expected to be of the form `%d@%f[,%d@%f]`');
+      throw new Error(
+        'freqScript pairs are expected to be of the form `%d@%f[,%d@%f]`'
+      );
     }
   });
 };
@@ -142,23 +148,19 @@ function toneGenerator(script, unitAmplitude) {
     unitAmplitude = 0.2;
   }
 
+  // figure out the time when each cadence starts
+  var cadStarts = tone.cadences.reduce(function (acc, cad) {
+    return acc.concat(acc[acc.length - 1] + cad.duration);
+  }, [0]);
+
   return function (t) {
-    // time is in seconds, not milliseconds.
-
-    // figure out the time when each cadence starts
-    var cadStarts = tone.cadences.reduce(function (acc, cad) {
-      return acc.concat(acc[acc.length - 1] + cad.duration);
-    }, [0]);
-
     // Figure out which cadence we're in and
     // how far into it we are.
-    var cadIdx,
-        cadTime,
+    var cadTime,
         thisCad;
 
     cadStarts.some(function (s, i) {
       if (t >= s) {
-        cadIdx = i;
         cadTime = t - s;
         thisCad = tone.cadences[i];
         return true;
@@ -167,26 +169,32 @@ function toneGenerator(script, unitAmplitude) {
     });
 
     // Find the section starts, relative to the start of this cadence.
-    var sectStarts = thisCad.sections.reduce(function (acc, section) {
-      return acc.concat(acc[acc.length - 1] + section.on + section.off);
-    }, [0]),
-        sectDuration = sectStarts[sectStarts.length - 1];
+    var sectStarts = thisCad
+          .sections
+          .reduce(function (acc, section) {
+            return acc.concat(
+              acc[acc.length - 1] +
+              section.on + section.off
+            );
+          }, [0])
+        ,
+        sectDuration = sectStarts[sectStarts.length - 1],
+        modDuration = cadTime % sectDuration;
 
     // Figure out which section we're in and
     // how far into it we are.
-    var sectIdx,
-        sectTime,
+    var sectTime,
         thisSect;
 
     sectStarts.some(function (s, i) {
-      if (cadTime % sectDuration == 0) {
-        sectIdx = i;
-        sectTime = cadTime % sectDuration - s;
-        thisSect = thisCad.sections[sectIdx];
+      if (modDuration == 0) {
+        // Some bizarre edge case.
+        // Luckily, this simplifies things quite a bit.
+        sectTime = s;
+        thisSect = thisCad.sections[0];
         return true;
       }
-      else if ((cadTime % sectDuration) <= s) {
-        sectIdx = i - 1;
+      else if (modDuration <= s) {
         sectTime = s - (cadTime % sectDuration);
         thisSect = thisCad.sections[i - 1];
         return true;
@@ -204,15 +212,11 @@ function toneGenerator(script, unitAmplitude) {
       var lvl = 0;
       thisFreqs.forEach(function (f) {
         if (f) {
-          lvl += amp(f.decibels) * Math.sin(2 * Math.PI * f.frequency * t);
+          lvl += sin(f.decibels, f.frequency, t);
         }
       });
 
       return lvl;
-
-      function amp(db) {
-        return Math.pow(10, db/20) * unitAmplitude;
-      }
 
     }
     else {
@@ -220,4 +224,8 @@ function toneGenerator(script, unitAmplitude) {
       return 0;
     }
   };
+
+	function sin(db, f, t) {
+		return Math.pow(10, db/20) * unitAmplitude * Math.sin(2 * Math.PI * f * t);
+	}
 }
